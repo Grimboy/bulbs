@@ -481,6 +481,8 @@ class Node(Model, Vertex):
     #: A dict containing the database Property instances.
     _properties = None
 
+    element_type = None
+
     @classmethod
     def get_element_type(cls, config):
         """
@@ -654,6 +656,7 @@ class Relationship(Model, Edge):
           >>> friends = james.outV('knows')
 
     """
+    label = None
 
     @classmethod
     def get_label(cls, config):
@@ -739,7 +742,8 @@ class Relationship(Model, Edge):
         label = self.get_label(self._client.config)
         outV, inV = coerce_vertices(outV, inV)
         data, index_name, keys = self.get_bundle(_data, **kwds)
-        result = self._client.create_edge(outV, label, inV, data).one()
+        resp = self._client.create_indexed_edge(outV, label, inV, data, index_name, keys)
+        result = resp.one()
         self._initialize(result)
         
     def _update(self, _id, _data, kwds):
@@ -759,7 +763,8 @@ class Relationship(Model, Edge):
         
         """
         data, index_name, keys = self.get_bundle(_data, **kwds)
-        result = self._client.update_edge(_id, data).one()
+        resp = self._client.update_indexed_edge(_id, data, index_name, keys)
+        result = resp.one()
         self._initialize(result)
 
     def _initialize(self,result):
@@ -899,6 +904,7 @@ class RelationshipProxy(EdgeProxy):
         label_var = config.label_var
         label = self.element_class.get_label(config)
         return self.index.lookup(label_var,label)
+
 
     def get_property_keys(self):
         """

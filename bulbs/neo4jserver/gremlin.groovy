@@ -57,7 +57,7 @@ def update_indexed_vertex(_id, data, index_name, keys) {
 
 // Model - Edge
 
-def create_indexed_edge(outV,label,inV,data,index_name,keys) {
+def create_indexed_edge(outV,label,inV,data,index_name,keys,label_var) {
   import org.neo4j.graphdb.DynamicRelationshipType;
   neo4j = g.getRawGraph()
   manager = neo4j.index()
@@ -74,6 +74,7 @@ def create_indexed_edge(outV,label,inV,data,index_name,keys) {
       if (keys == null || keys.contains(entry.key))
 	index.add(edge,entry.key,String.valueOf(entry.value))
     }
+    index.add(edge,label_var,String.valueOf(label))
     g.stopTransaction(TransactionalGraph.Conclusion.SUCCESS)
     return edge
   } catch (e) {
@@ -82,6 +83,7 @@ def create_indexed_edge(outV,label,inV,data,index_name,keys) {
   }
 }
 
+// don't need to update indexed label, it can't change
 def update_indexed_edge(_id, data, index_name, keys) {
   neo4j = g.getRawGraph()
   manager = neo4j.index()
